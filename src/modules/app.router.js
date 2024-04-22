@@ -9,7 +9,9 @@ const initApp=(app,express)=>{
     app.use('/auth',authRouter)
     app.use('/user',userRouter)
 
-
+    app.use((err,req,res,next)=>{
+        return res.json({message:err.message})
+    } )
 }
 
 export default initApp;
