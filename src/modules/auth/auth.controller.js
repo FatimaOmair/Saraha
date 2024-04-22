@@ -4,12 +4,12 @@ import jwt from "jsonwebtoken";
 import { signUpSchema } from "./auth.validation.js";
 import sendEmail from "../../utils/sendEmail.js";
 
-export const signUp = async (req, res) => {
+export const signUp = async (req, res,next) => {
     try {
         const { userName, email, password } = req.body;
         const existingUser = await userModel.findOne({ email });
         if (existingUser) {
-            return res.status(409).json({ message: "User already exists" });
+            return next(new Error("User already exists"))
         }
 
         const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALTROUND));
@@ -38,7 +38,6 @@ export const signUp = async (req, res) => {
 };
 
 
-
 export const confirmEmail = async (req, res) => {
   try {
       const { token } = req.params;
@@ -59,3 +58,32 @@ export const confirmEmail = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired token" });
   }
 };
+
+
+
+
+
+export const signIn = async (req, res) => {
+    const { email, password } = req.body; // Destructuring email and password from request body
+
+    try {
+        const user = await userModel.findOne({ email }).select('userName password');
+
+        if (!user) {
+            return res.status(400).json({ message: "Email does not exist" });
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match) {
+            return res.status(400).json({ message: "Invalid password" });
+        }
+       const token = jwt.sign({id:user._id},process.env.LOGINSIG)
+        // If both email and password are correct, return success message and user data
+        return res.json({ message: "Success", token });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
