@@ -2,7 +2,7 @@ import messageModel from "../../../DB/model/message.model.js";
 import userModel from "../../../DB/model/user.model.js";
 
 export const getMessages=async(req,res)=>{
-    const messageList=await messageModel.find({reciverId:req.user._id})
+    const messageList=await messageModel.find({reciverId:req.params._id})
     return res.json({message:"success",messageList})
 }
 
