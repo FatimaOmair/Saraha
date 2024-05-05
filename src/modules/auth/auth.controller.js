@@ -41,18 +41,28 @@ export const signUp = async (req, res,next) => {
 export const confirmEmail = async (req, res) => {
   try {
       const { token } = req.params;
+      return res.json(decoded);
+      const decoded = jwt.verify(token, process.env.EMAILSIGN);
+      
+      const updatedUser = await userModel.findOneAndUpdate({ email: decoded.email }, { confirmEmail: true }, { new: true });
       console.log(token)
+
+      
+
       if (!token) {
           return res.status(400).json({ message: "Token is missing" });
       }
-      const decoded = jwt.verify(token, process.env.EMAILSIGN);
-      const updatedUser = await userModel.findOneAndUpdate({ email: decoded.email }, { confirmEmail: true }, { new: true });
+     
 
       if (!updatedUser) {
           return res.status(404).json({ message: "User not found" });
       }
 
-      return res.redirect(process.env.FURL + "/email-confirmed");
+      if(updatedUser.modifiedCount>0){
+        return res.redirect(process.env.FURL + "/email-confirmed");
+      }
+
+     
   } catch (error) {
       console.error("Error in confirmEmail:", error);
       return res.status(400).json({ message: "Invalid or expired token" });

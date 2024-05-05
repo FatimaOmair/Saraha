@@ -13,7 +13,7 @@ async function sendEmail(dest, subject, html) {
     });
 
     const info = await transporter.sendMail({
-        from: `Infinity Light <${process.env.USEREMAIL}>`, // sender address
+        from: `Infinity Light <${process.env.USEREMAIL}>`, 
         to:dest, 
         subject, 
         html, 
